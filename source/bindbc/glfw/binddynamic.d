@@ -271,6 +271,10 @@ private {
     GLFWSupport loadedVersion;
 }
 
+SharedLib getGLFWLib() {
+    return lib;
+}
+
 @nogc nothrow:
 
 void unloadGLFW()
@@ -565,15 +569,14 @@ static if(bindWindows) {
                 pglfwGetWin32Window glfwGetWin32Window;
             }
 
-            bool loadGLFW_Windows()
+            void loadGLFW_Windows()
             {
-                assert(lib != invalidHandle, "loadGLFW must be successfully called before loadGLFW_Windows");
+                import bindbc.loader;
+                assert(isGLFWLoaded(), "loadGLFW must be successfully called before loadGLFW_Windows");
 
-                auto errCount = errorCount();
-                lib.bindSymbol(cast(void**)&glfwGetWin32Adapter, "glfwGetWin32Adapter");
-                lib.bindSymbol(cast(void**)&glfwGetWin32Monitor, "glfwGetWin32Monitor");
-                lib.bindSymbol(cast(void**)&glfwGetWin32Window,"glfwGetWin32Window");
-                return errorCount() == errCount;
+                getGLFWLib().bindSymbol(cast(void**)&glfwGetWin32Adapter, "glfwGetWin32Adapter");
+                getGLFWLib().bindSymbol(cast(void**)&glfwGetWin32Monitor, "glfwGetWin32Monitor");
+                getGLFWLib().bindSymbol(cast(void**)&glfwGetWin32Window,"glfwGetWin32Window");
             }
         };
     }
@@ -581,12 +584,11 @@ static if(bindWindows) {
         enum bindGLFW_Windows = q{
             extern(C) @nogc nothrow alias pglfwGetWin32Window = HWND function(GLFWwindow* window);
              __gshared pglfwGetWin32Window glfwGetWin32Window;
-            bool loadGLFW_Windows() {
-                assert(lib != invalidHandle, "loadGLFW must be successfully called before loadGLFW_Windows");
+            void loadGLFW_Windows() {
+                import bindbc.loader;
+                assert(isGLFWLoaded(), "loadGLFW must be successfully called before loadGLFW_Windows");
 
-                auto errCount = errorCount();
-                lib.bindSymbol(cast(void**)&glfwGetWin32Window,"glfwGetWin32Window");
-                return errorCount() == errCount;
+                getGLFWLib().bindSymbol(cast(void**)&glfwGetWin32Window,"glfwGetWin32Window");
             }
         };
     }
